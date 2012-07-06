@@ -9,13 +9,22 @@ import re
 print("Reading config...")
 cfg = conf.readConfig("config.cfg")
 
-print("Downloading...")
+
+print("Builing list...")
+links = set()
+#check 
 for line in open("download.info"):
   line.strip()
   r = re.compile(r"((/[\w\_\d]+){3}/[\w\.\_\-\+\:\d]+\.tar\.xz)")
   match = r.search(line)
   if match:
     link = match.group(1)
+    links += set(link)
+#save list(load+append+save)
+print("Downloading...")
+for line in open("download.info"):
+  line.strip()
+  ##load links
     file_url = cfg.serv+link
     local_name = cfg.path+link
     if os.path.exists(os.path.dirname(local_name)) == False:
