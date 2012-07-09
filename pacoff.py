@@ -49,6 +49,7 @@ def updateDb(links): #links = set(...)
   saveLinks(links, PACOFF_DB_NAME)
 
 def convertInfoToDb():
+  links = set()
   try:
     if os.path.exists(PACOFF_INFO_NAME):
       for line in open(PACOFF_INFO_NAME):
@@ -67,12 +68,13 @@ def convertInfoToDb():
 def download():
   #read config
   print("Reading config...")
-  cfg = conf.readConfig(PACOFF_CONF_NAME)
+  cfg = readConfig(PACOFF_CONF_NAME)
 
   convertInfoToDb()
-
+  links = loadLinks(PACOFF_DB_NAME)
+  err_count = 0
   print("Downloading...")
-  while (len(links) > 0):
+  while (len(links) > 0 and err_count < 15):
     ##load links
     link = links.pop()
     links.add(link)
@@ -83,25 +85,45 @@ def download():
       local_name = cfg.path+link
       if os.path.exists(os.path.dirname(local_name)) == False:
         os.makedirs(os.path.dirname(local_name))
+      if os.path.exists(local_name):
+        print("{0} exists!".format(local_name))
+        links.remove(link)
+        continue
       print("Loading: '{0}' to '{1}'".format(file_url,local_name))
       urllib.request.urlretrieve(file_url,local_name)
-    except urllib.error.URLError as err:
+    except (ValueError,urllib.error.URLError) as err:
       print(err)
+      if os.path.exists(local_name):
+        os.remove(local_name)
+        print(local_name+" removed!")
       time.sleep(1)
-    finally:
+      err_count += 1
+    else:
       links.remove(link)
+    finally:
       saveLinks(links, PACOFF_DB_NAME)
+  if err_count > 10: print ("Too much errors while downloading!")
 
 def update(): #update repo headers, append links into db for download
   #read config
   print("Reading config...")
-  cfg = conf.readConfig(PACOFF_CONF_NAME)
+  cfg = readConfig(PACOFF_CONF_NAME)
   links=set()
   for repo in cfg.repos:
     for arch in cfg.archs:
+      if repo == 'multilib' and arch == 'i686':
+        continue
       link = "/{repo}/os/{arch}/{repo}".format(repo=repo,arch=arch)
       links.add(link+".db")
       links.add(link+".files")
+      local_name = cfg.path+link+".db"
+      if os.path.exists(local_name):
+        os.remove(local_name)
+        print(local_name+" removed!")
+      local_name = cfg.path+link+".files"
+      if os.path.exists(local_name):
+        os.remove(local_name)
+        print(local_name+" removed!")
   updateDb(links)
   
 def upgrade():
@@ -123,5 +145,7 @@ if __name__ == "__main__":
     if sys.argv[1].lower() == 'update': update()
     if sys.argv[1].lower() == 'upgrade': upgrade()
     if sys.argv[1].lower() == 'download': download()
+    if sys.argv[1].lower() == 'run': print("'run' command under construction - but wrong usage!")
+  if len(sys.argv) > 2:
     if sys.argv[1].lower() == 'run': print("'run' command under construction")
 
