@@ -132,6 +132,7 @@ def update(): #update repo headers, append links into db for download
         os.remove(local_name)
         print(local_name+" removed!")
   updateDb(links)
+  download()
   
 def upgrade():
   print("Running upgrade...")
@@ -145,9 +146,9 @@ if __name__ == "__main__":
     if sys.argv[1].lower() == 'upgrade': upgrade()
     if sys.argv[1].lower() == 'download': download()
     if sys.argv[1].lower() == 'run': print("'run' command under construction - but wrong usage!")
-  else if len(sys.argv) > 2:
+  elif len(sys.argv) > 2:
     if sys.argv[1].lower() == 'run': print("'run' command under construction")
-  else if len(sys.argv) == 1:
+  elif len(sys.argv) == 1:
     #print help
     print("usage: {0} update|upgrade|download|run 'pacman-command'\n"
           "update - adds repo-headers links into download-database\n"
