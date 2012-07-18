@@ -83,6 +83,7 @@ def download():
         continue
       file_url = cfg.serv+link
       local_name = cfg.path+link
+      #local_name = re.sub(":","\:", local_name)
       if os.path.exists(os.path.dirname(local_name)) == False:
         os.makedirs(os.path.dirname(local_name))
       if os.path.exists(local_name):
@@ -91,6 +92,7 @@ def download():
         continue
       print("Loading: '{0}' to '{1}'".format(file_url,local_name))
       urllib.request.urlretrieve(file_url,local_name)
+      urllib.request.urlcleanup()
     except (ValueError,urllib.error.URLError) as err:
       print(err)
       if os.path.exists(local_name):
@@ -98,6 +100,11 @@ def download():
         print(local_name+" removed!")
       time.sleep(1)
       err_count += 1
+    except IOError as err:
+      print(err)
+      print("Name '{0}' may be not allowed on FAT/NTFS partitions!".format(link))
+      links.remove(link)
+      open("error.db","at").write(link+"\n")
     else:
       links.remove(link)
     finally:
@@ -133,7 +140,14 @@ def upgrade():
   
   
 if __name__ == "__main__":
-  if len(sys.argv) == 1:
+  if len(sys.argv) == 2:
+    if sys.argv[1].lower() == 'update': update()
+    if sys.argv[1].lower() == 'upgrade': upgrade()
+    if sys.argv[1].lower() == 'download': download()
+    if sys.argv[1].lower() == 'run': print("'run' command under construction - but wrong usage!")
+  else if len(sys.argv) > 2:
+    if sys.argv[1].lower() == 'run': print("'run' command under construction")
+  else if len(sys.argv) == 1:
     #print help
     print("usage: {0} update|upgrade|download|run 'pacman-command'\n"
           "update - adds repo-headers links into download-database\n"
@@ -141,11 +155,3 @@ if __name__ == "__main__":
           "download - download all files in download-database\n"
           #"run - "
           "'run' command under construction".format(sys.argv[0]))
-  if len(sys.argv) == 2:
-    if sys.argv[1].lower() == 'update': update()
-    if sys.argv[1].lower() == 'upgrade': upgrade()
-    if sys.argv[1].lower() == 'download': download()
-    if sys.argv[1].lower() == 'run': print("'run' command under construction - but wrong usage!")
-  if len(sys.argv) > 2:
-    if sys.argv[1].lower() == 'run': print("'run' command under construction")
-
