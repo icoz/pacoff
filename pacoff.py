@@ -132,7 +132,6 @@ def update(): #update repo headers, append links into db for download
         os.remove(local_name)
         print(local_name+" removed!")
   updateDb(links)
-  download()
   
 def upgrade():
   print("Running upgrade...")
@@ -142,7 +141,9 @@ def upgrade():
   
 if __name__ == "__main__":
   if len(sys.argv) == 2:
-    if sys.argv[1].lower() == 'update': update()
+    if sys.argv[1].lower() == 'update': 
+      update()
+      download()
     if sys.argv[1].lower() == 'upgrade': upgrade()
     if sys.argv[1].lower() == 'download': download()
     if sys.argv[1].lower() == 'run': print("'run' command under construction - but wrong usage!")
