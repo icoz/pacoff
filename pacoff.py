@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 import urllib.request
 import urllib.error
 import os
@@ -44,7 +44,7 @@ def saveLinks(links, filename):
 
 def updateDb(links): #links = set(...)
   print("Building list...")
-  #check 
+  #check
   links.update(loadLinks(PACOFF_DB_NAME))
   saveLinks(links, PACOFF_DB_NAME)
 
@@ -63,9 +63,9 @@ def convertInfoToDb():
       os.remove(PACOFF_INFO_NAME)
   except IOError as err:
     print(err)
-  
+
 #from download.py
-def download():
+def download(delExistFile = False):
   #read config
   print("Reading config...")
   cfg = readConfig(PACOFF_CONF_NAME)
@@ -87,8 +87,14 @@ def download():
       if os.path.exists(os.path.dirname(local_name)) == False:
         os.makedirs(os.path.dirname(local_name))
       if os.path.exists(local_name):
-        print("{0} exists!".format(local_name))
-        links.remove(link)
+        if delExistFile:
+          print("{0} exists! Removed!".format(local_name))
+          os.remove(local_name)
+          #links.remove(link)
+        else:
+          print("{0} exists!".format(local_name))
+          links.remove(link)
+          open("error.db","at").write(link+"\n")
         continue
       print("Loading: '{0}' to '{1}'".format(file_url,local_name))
       urllib.request.urlretrieve(file_url,local_name)
@@ -132,20 +138,21 @@ def update(): #update repo headers, append links into db for download
         os.remove(local_name)
         print(local_name+" removed!")
   updateDb(links)
-  
+
 def upgrade():
   print("Running upgrade...")
   os.system("sudo pacman -Suyp > download.info")
   convertInfoToDb()
-  
-  
+
+
 if __name__ == "__main__":
   if len(sys.argv) == 2:
-    if sys.argv[1].lower() == 'update': 
+    if sys.argv[1].lower() == 'update':
       update()
       download()
     if sys.argv[1].lower() == 'upgrade': upgrade()
     if sys.argv[1].lower() == 'download': download()
+    if sys.argv[1].lower() == 'download-del': download(True)
     if sys.argv[1].lower() == 'run': print("'run' command under construction - but wrong usage!")
   elif len(sys.argv) > 2:
     if sys.argv[1].lower() == 'run': print("'run' command under construction")
