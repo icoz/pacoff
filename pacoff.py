@@ -94,7 +94,7 @@ def download(delExistFile = False):
         else:
           print("{0} exists!".format(local_name))
           links.remove(link)
-          open("error.db","at").write(link+"\n")
+          open("exists.db","at").write(link+"\n")
         continue
       print("Loading: '{0}' to '{1}'".format(file_url,local_name))
       urllib.request.urlretrieve(file_url,local_name)
