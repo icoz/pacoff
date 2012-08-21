@@ -149,7 +149,7 @@ if __name__ == "__main__":
   if len(sys.argv) == 2:
     if sys.argv[1].lower() == 'update':
       update()
-      download()
+      download(True)
     if sys.argv[1].lower() == 'upgrade': upgrade()
     if sys.argv[1].lower() == 'download': download()
     if sys.argv[1].lower() == 'download-del': download(True)
